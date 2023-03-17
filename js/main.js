@@ -16,7 +16,8 @@ for (var z = 0; z < 20; ++z) {
 
 function pointStyleFunction(f) {
     var p = f.getProperties(),
-        color, stroke, radius, fPoints = 3;
+        color, stroke, radius, fPoints = 3,
+        z = map.getView().getZoom();
     if (f === currentFeature) {
         stroke = new ol.style.Stroke({
             color: 'rgba(255,0,255,0.5)',
@@ -31,6 +32,9 @@ function pointStyleFunction(f) {
         });
 
         radius = 20;
+        if (z <= 12) {
+            radius = 10;
+        }
     }
     if (p.type == 1) {
         color = '#cccccc';
@@ -67,7 +71,10 @@ function pointStyleFunction(f) {
             })
         })
     });
-    pointStyle.getText().setText(p.name);
+    if (z > 12 || radius === 35) {
+        pointStyle.getText().setText(p.name);
+    }
+
     return pointStyle;
 }
 var sidebarTitle = document.getElementById('sidebarTitle');
@@ -275,26 +282,37 @@ var baseLines = [];
 $.get('data/base.csv', {}, function(c) {
     baseLines = $.csv.toArrays(c);
     for (k in baseLines) {
-        baseLines[k].push('1');
+        baseLines[k].push(1);
     }
     $.get('https://docs.google.com/spreadsheets/d/e/2PACX-1vSWfgWA8YW5DnbWsg11CFa3vqO_2OJlcNvcsjIunCYMfX43OnG3RwBH721vkScuYgArgLe_2huNPnBU/pub?output=csv', {}, function(c) {
         var lines = $.csv.toArrays(c);
         lines.shift();
         for (k in lines) {
-            lines[k].push('2');
+            lines[k].push(2);
             baseLines.push(lines[k]);
         }
         lines = baseLines;
         for (k in lines) {
+            lines[k][3] = parseFloat(lines[k][3]);
+            lines[k][4] = parseFloat(lines[k][4]);
+            if (!lines[k][4] || Number.isNaN(lines[k][3]) || Number.isNaN(lines[k][4])) {
+                continue;
+            }
             var key = lines[k][5];
             var status = 1;
             switch (lines[k][2]) {
-                case '有買到，剩不多':
-                    status = 2;
+                case '有買到，還很多':
+                    status = 1;
                     break;
                 case '沒買到！！！':
                     status = 3;
                     break;
+                default:
+                    status = 2;
+                    break;
+            }
+            if (lines[k][6] == 1) {
+                lines[k][2] = '未有通報';
             }
             if (!points[key]) {
                 points[key] = {
@@ -302,8 +320,8 @@ $.get('data/base.csv', {}, function(c) {
                     'name': lines[k][1],
                     'status': status,
                     'statusText': lines[k][2],
-                    'longitude': parseFloat(lines[k][3]),
-                    'latitude': parseFloat(lines[k][4]),
+                    'longitude': lines[k][3],
+                    'latitude': lines[k][4],
                     'time': lines[k][0],
                     'type': lines[k][6]
                 };
@@ -311,6 +329,7 @@ $.get('data/base.csv', {}, function(c) {
                 points[key]['status'] = status;
                 points[key]['statusText'] = lines[k][2];
                 points[key]['time'] = lines[k][0];
+                points[key]['type'] = lines[k][6];
             }
         }
         var pointsFc = [];
