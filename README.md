@@ -11,8 +11,8 @@ $ git clone
 ----
 
 ## 畫面截圖
-![](https://i.imgur.com/vh8eHou.png)
+![](https://i.imgur.com/YmSYg81.png)
 > 如果購買雞蛋的地點已經在地圖上，點選後就可以展開最新資訊
 
-![](https://i.imgur.com/nhbobnp.png)
+![](https://i.imgur.com/o0bnfWw.png)
 > 可自行點選該所在位置並填寫相關資料，分享該雜貨門市雞蛋供應狀況
